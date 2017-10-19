@@ -34,8 +34,9 @@ object Ops {
   def tryWrap[E, A, B](b: B)(implicit tryWrap: TryWrap[E, A, B]): E \/ A = tryWrap.apply(b)
 }
 
-case class AnyString(override val toString: String) extends AnyVal
+class AnyString private[AnyString] (override val toString: String) extends AnyVal
 object AnyString {
+  def apply(s: String): AnyString = new AnyString(s)
   implicit val eq: Equal[AnyString] = Equal.equalA
   implicit val stringWrap : Wrap[AnyString, String] = Wrap[AnyString, String](AnyString.apply)
   implicit val stringUnwrap: Unwrap[AnyString, String] = Unwrap[AnyString, String](_.toString)
@@ -49,16 +50,15 @@ object InvalidUuid {
   implicit val eq: Equal[InvalidUuid] = Equal.equalA
 }
 object Uuid {
-  implicit val eq: Equal[Uuid] = Equal.equalA
-  implicit val uuidWrap: Wrap[Uuid, JavaUuid] = Wrap[Uuid, JavaUuid](new Uuid(_))
-  implicit val uuidUnwrap: Unwrap[Uuid, JavaUuid] = Unwrap[Uuid, JavaUuid](_.uuid)
-  implicit val stringTryWrap: TryWrap[InvalidUuid, Uuid, String] = TryWrap[InvalidUuid, Uuid, String](s =>
+  def apply(s: String): InvalidUuid \/ Uuid =
     try {
       \/-(new Uuid(JavaUuid.fromString(s)))
     } catch {
       case e: IllegalArgumentException => -\/(InvalidUuid(e))
     }
-  )
-
+  implicit val eq: Equal[Uuid] = Equal.equalA
+  implicit val uuidWrap: Wrap[Uuid, JavaUuid] = Wrap[Uuid, JavaUuid](new Uuid(_))
+  implicit val uuidUnwrap: Unwrap[Uuid, JavaUuid] = Unwrap[Uuid, JavaUuid](_.uuid)
+  implicit val stringTryWrap: TryWrap[InvalidUuid, Uuid, String] = TryWrap[InvalidUuid, Uuid, String](apply)
   implicit val stringUnwrap: Unwrap[Uuid, String] = Unwrap[Uuid, String](_.toString)
 }
