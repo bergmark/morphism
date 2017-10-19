@@ -6,7 +6,8 @@ lazy val root = (project in file("."))
     scalaVersion := "2.12.3",
     libraryDependencies ++= Seq(
       "org.scalaz" %% "scalaz-core" % "7.3.0-M17",
-      "org.scalatest" %% "scalatest" % "3.2.0-SNAP9" % "test"
+      "org.scalatest" %% "scalatest" % "3.2.0-SNAP9" % "test",
+      "org.scalacheck" %% "scalacheck" % "1.13.5" % "test"
     ),
     scalacOptions ++= Seq(
     "-deprecation",                      // Emit warning and location for usages of deprecated APIs.
